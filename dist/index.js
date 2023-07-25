@@ -62,8 +62,10 @@ function run() {
                     const commentText = core.getInput('comment-text', { required: true });
                     const commentPinned = core.getBooleanInput('comment-pinned');
                     client.stories.createStoryForTask(taskId, {
-                        text: commentText,
-                        is_pinned: commentPinned
+                        data: {
+                            text: commentText,
+                            is_pinned: commentPinned
+                        }
                     }).catch(() => {
                         core.setFailed('Failed to create the comment');
                     });
@@ -72,8 +74,10 @@ function run() {
                     const customFieldId = core.getInput('custom-field-id', { required: true });
                     const customFieldValue = core.getInput('custom-field-value', { required: true });
                     client.tasks.updateTask(taskId, {
-                        custom_fields: {
-                            [customFieldId]: customFieldValue
+                        data: {
+                            custom_fields: {
+                                [customFieldId]: customFieldValue
+                            }
                         }
                     }).catch(() => {
                         core.setFailed('Failed to update the custom field');
