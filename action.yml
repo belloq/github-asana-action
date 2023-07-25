@@ -1,11 +1,26 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Asana GitHub Actions'
+description: 'Asana GitHub Actions'
+author: belloq
 inputs:
-  milliseconds: # change this
+  asana-secret:
+    description: 'Asana Personal Access Token'
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  action:
+    description: 'The action to be performed'
+    required: true
+  comment-text:
+    description: 'Comment text'
+    required: false
+  comment-pinned:
+    description: 'Comment is pinned'
+    required: false
+    default: false
+  custom-field-id:
+    description: 'Custom field ID'
+    required: false
+  custom-field-value:
+    description: 'Custom field value'
+    required: false
 runs:
   using: 'node16'
   main: 'dist/index.js'

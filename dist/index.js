@@ -38,18 +38,49 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
-const wait_1 = __nccwpck_require__(817);
+// @ts-ignore
+const asana_1 = __importDefault(__nccwpck_require__(357));
+const task_1 = __nccwpck_require__(776);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const ms = core.getInput('milliseconds');
-            core.debug(`Waiting ${ms} milliseconds ...`); // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
-            core.debug(new Date().toTimeString());
-            yield (0, wait_1.wait)(parseInt(ms, 10));
-            core.debug(new Date().toTimeString());
-            core.setOutput('time', new Date().toTimeString());
+            const secret = core.getInput('asana_secret');
+            const action = core.getInput('action');
+            const client = asana_1.default.Client.create().useAccessToken(secret);
+            const taskId = (0, task_1.parseTaskId)();
+            if (!taskId) {
+                core.info('Asana Task not found');
+                return;
+            }
+            switch (action) {
+                case 'add-comment':
+                    const commentText = core.getInput('comment-text', { required: true });
+                    const commentPinned = core.getBooleanInput('comment-pinned');
+                    client.stories.createStoryForTask(taskId, {
+                        text: commentText,
+                        is_pinned: commentPinned
+                    }).catch(() => {
+                        core.setFailed('Failed to create the comment');
+                    });
+                    break;
+                case 'update-custom-field':
+                    const customFieldId = core.getInput('custom-field-id', { required: true });
+                    const customFieldValue = core.getInput('custom-field-value', { required: true });
+                    client.tasks.updateTask(taskId, {
+                        custom_fields: {
+                            [customFieldId]: customFieldValue
+                        }
+                    }).catch(() => {
+                        core.setFailed('Failed to update the custom field');
+                    });
+                default:
+                    break;
+            }
         }
         catch (error) {
             if (error instanceof Error)
@@ -62,33 +93,23 @@ run();
 
 /***/ }),
 
-/***/ 817:
-/***/ (function(__unused_webpack_module, exports) {
+/***/ 776:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.wait = void 0;
-function wait(milliseconds) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(resolve => {
-            if (isNaN(milliseconds)) {
-                throw new Error('milliseconds not a number');
-            }
-            setTimeout(() => resolve('done!'), milliseconds);
-        });
-    });
+exports.parseTaskId = void 0;
+// @ts-ignore
+const github_1 = __nccwpck_require__(716);
+const TASK_REGEX = new RegExp('https:\\/\\/app.asana.com\\/(\\d+)\\/(?<project>\\d+)\\/(?<task>\\d+)', 'g');
+function parseTaskId() {
+    var _a;
+    const pullRequest = github_1.context.payload.pull_request;
+    const res = TASK_REGEX.exec((pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.body) || '');
+    return (_a = res === null || res === void 0 ? void 0 : res.groups) === null || _a === void 0 ? void 0 : _a.task;
 }
-exports.wait = wait;
+exports.parseTaskId = parseTaskId;
 
 
 /***/ }),
@@ -1818,6 +1839,10 @@ function checkBypass(reqUrl) {
     if (!reqUrl.hostname) {
         return false;
     }
+    const reqHost = reqUrl.hostname;
+    if (isLoopbackAddress(reqHost)) {
+        return true;
+    }
     const noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
     if (!noProxy) {
         return false;
@@ -1843,13 +1868,24 @@ function checkBypass(reqUrl) {
         .split(',')
         .map(x => x.trim().toUpperCase())
         .filter(x => x)) {
-        if (upperReqHosts.some(x => x === upperNoProxyItem)) {
+        if (upperNoProxyItem === '*' ||
+            upperReqHosts.some(x => x === upperNoProxyItem ||
+                x.endsWith(`.${upperNoProxyItem}`) ||
+                (upperNoProxyItem.startsWith('.') &&
+                    x.endsWith(`${upperNoProxyItem}`)))) {
             return true;
         }
     }
     return false;
 }
 exports.checkBypass = checkBypass;
+function isLoopbackAddress(host) {
+    const hostLower = host.toLowerCase();
+    return (hostLower === 'localhost' ||
+        hostLower.startsWith('127.') ||
+        hostLower.startsWith('[::1]') ||
+        hostLower.startsWith('[0:0:0:0:0:0:0:1]'));
+}
 //# sourceMappingURL=proxy.js.map
 
 /***/ }),
@@ -2777,6 +2813,22 @@ function version(uuid) {
 
 var _default = version;
 exports["default"] = _default;
+
+/***/ }),
+
+/***/ 716:
+/***/ ((module) => {
+
+module.exports = eval("require")("@actions/github");
+
+
+/***/ }),
+
+/***/ 357:
+/***/ ((module) => {
+
+module.exports = eval("require")("asana");
+
 
 /***/ }),
 
