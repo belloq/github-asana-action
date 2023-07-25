@@ -48,9 +48,10 @@ const task_1 = __nccwpck_require__(3776);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const secret = core.getInput('asana_secret');
+            const secret = core.getInput('asana-secret');
             const action = core.getInput('action');
-            const client = asana_1.default.Client.create().useAccessToken(secret);
+            // @ts-ignore
+            const client = asana_1.default.Client.create({ logAsanaChangeWarnings: false }).useAccessToken(secret);
             const taskId = (0, task_1.parseTaskId)();
             if (!taskId) {
                 core.info('Asana Task not found');

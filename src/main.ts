@@ -4,10 +4,11 @@ import { parseTaskId } from './util/task'
 
 async function run(): Promise<void> {
   try {
-    const secret = core.getInput('asana_secret')
+    const secret = core.getInput('asana-secret')
     const action = core.getInput('action')
 
-    const client = asana.Client.create().useAccessToken(secret)
+    // @ts-ignore
+    const client = asana.Client.create({ logAsanaChangeWarnings: false }).useAccessToken(secret)
     const taskId = parseTaskId()
 
     if (!taskId) {
