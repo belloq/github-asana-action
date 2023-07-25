@@ -1,5 +1,4 @@
 import * as core from '@actions/core'
-// @ts-ignore
 import asana from 'asana'
 import { parseTaskId } from './util/task'
 
@@ -20,11 +19,9 @@ async function run(): Promise<void> {
       case 'add-comment':
         const commentText = core.getInput('comment-text', { required: true })
         const commentPinned = core.getBooleanInput('comment-pinned')
-        client.stories.createStoryForTask(taskId, {
-          data: {
-            text: commentText,
-            is_pinned: commentPinned
-          }
+        client.stories.createOnTask(taskId, {
+          text: commentText,
+          is_pinned: commentPinned
         }).catch(() => {
           core.setFailed('Failed to create the comment')
         })
@@ -35,10 +32,8 @@ async function run(): Promise<void> {
         const customFieldId = core.getInput('custom-field-id', { required: true })
         const customFieldValue = core.getInput('custom-field-value', { required: true })
         client.tasks.updateTask(taskId, {
-          data: {
-            custom_fields: {
-              [customFieldId]: customFieldValue
-            }
+          custom_fields: {
+            [customFieldId]: customFieldValue
           }
         }).catch(() => {
           core.setFailed('Failed to update the custom field')

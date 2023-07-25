@@ -43,7 +43,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-// @ts-ignore
 const asana_1 = __importDefault(__nccwpck_require__(3565));
 const task_1 = __nccwpck_require__(3776);
 function run() {
@@ -61,11 +60,9 @@ function run() {
                 case 'add-comment':
                     const commentText = core.getInput('comment-text', { required: true });
                     const commentPinned = core.getBooleanInput('comment-pinned');
-                    client.stories.createStoryForTask(taskId, {
-                        data: {
-                            text: commentText,
-                            is_pinned: commentPinned
-                        }
+                    client.stories.createOnTask(taskId, {
+                        text: commentText,
+                        is_pinned: commentPinned
                     }).catch(() => {
                         core.setFailed('Failed to create the comment');
                     });
@@ -74,10 +71,8 @@ function run() {
                     const customFieldId = core.getInput('custom-field-id', { required: true });
                     const customFieldValue = core.getInput('custom-field-value', { required: true });
                     client.tasks.updateTask(taskId, {
-                        data: {
-                            custom_fields: {
-                                [customFieldId]: customFieldValue
-                            }
+                        custom_fields: {
+                            [customFieldId]: customFieldValue
                         }
                     }).catch(() => {
                         core.setFailed('Failed to update the custom field');
