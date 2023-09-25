@@ -32,7 +32,7 @@
   "devDependencies": {
     "@types/asana": "^0.18.12",
     "@types/node": "^20.5.9",
-    "@typescript-eslint/parser": "^6.2.0",
+    "@typescript-eslint/parser": "^6.7.2",
     "@vercel/ncc": "^0.36.1",
     "eslint": "^8.48.0",
     "eslint-plugin-github": "^4.8.0",
